@@ -8,10 +8,8 @@ type TestServer = {
 };
 
 export class TestSuite {
-  private tests: { name: string; func: TestFunc }[] = [];
   private beforeEachs: TestFunc[] = [];
   private afterAlls: TestFunc[] = [];
-  private promises = [] as Promise<void>[];
 
   constructor(private prefix: string) {}
 
