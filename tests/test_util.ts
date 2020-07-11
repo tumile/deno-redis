@@ -11,6 +11,7 @@ export class TestSuite {
   private tests: { name: string; func: TestFunc }[] = [];
   private beforeEachs: TestFunc[] = [];
   private afterAlls: TestFunc[] = [];
+  private promises = [] as Promise<void>[];
 
   constructor(private prefix: string) {}
 
@@ -23,29 +24,25 @@ export class TestSuite {
   }
 
   test(name: string, func: TestFunc): void {
-    this.tests.push({ name, func });
+    Deno.test(`[${this.prefix}] ${name}`, async () => {
+      for (const f of this.beforeEachs) {
+        await f();
+      }
+      await func();
+    });
   }
 
-  runTests = async (): Promise<void> => {
-    try {
-      for (const test of this.tests) {
-        let res: void | Error;
-        try {
-          res = await this.beforeEachs
-            .reduce((p, f) => p.then(f), Promise.resolve())
-            .then(test.func);
-        } catch (err) {
-          res = err;
+  runTests = (): void => {
+    Deno.test({
+      name: `[${this.prefix}] afterAll`,
+      fn: async () => {
+        for (const afterAll of this.afterAlls) {
+          await afterAll();
         }
-        Deno.test(`[${this.prefix}] ${test.name}`, () => {
-          if (res instanceof Error) {
-            throw res;
-          }
-        });
-      }
-    } finally {
-      this.afterAlls.forEach(async (f) => await f());
-    }
+      },
+      sanitizeOps: false,
+      sanitizeResources: false,
+    });
   };
 }
 
