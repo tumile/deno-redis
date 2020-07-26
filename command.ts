@@ -204,7 +204,7 @@ export interface RedisCommands {
     client_id?: string;
     type?: "NORMAL" | "MASTER" | "SLAVE" | "REPLICA" | "PUBSUB";
     user?: string;
-    skipme?: "yes" | "no";
+    skipme?: "YES" | "NO";
   }): Promise<Integer>;
 
   /**
@@ -246,7 +246,7 @@ export interface RedisCommands {
    * Echo the given string
    * @param message
    */
-  echo(message: string): Promise<BulkString>;
+  echo(message: string | number): Promise<BulkString>;
 
   /**
    * Ping the server
@@ -257,7 +257,7 @@ export interface RedisCommands {
    * Ping the server with message
    * @param message
    */
-  ping(message: string): Promise<BulkString>;
+  ping(message: string | number): Promise<BulkString>;
 
   /**
    * Close the connection
@@ -447,13 +447,13 @@ export interface RedisCommands {
   hmget(key: string, field: string, ...fields: string[]): Promise<Bulk[]>;
 
   /**
-   * Set hash field to multiple value
+   * Set hash field to value
    * @deprecated since 4.0, use hset instead
    * @param key
    * @param field
    * @param value
    */
-  hmset(key: string, field: string, value: string): Promise<Status>;
+  hmset(key: string, field: string, value: string | number): Promise<Status>;
 
   /**
    * Set multiple hash fields to multiple values
@@ -461,7 +461,7 @@ export interface RedisCommands {
    * @param key
    * @param field_values mutiple fields and values
    */
-  hmset(key: string, ...field_values: string[]): Promise<Status>;
+  hmset(key: string, ...field_values: (string | number)[]): Promise<Status>;
 
   /**
    * Set the string value of a hash field
@@ -469,14 +469,14 @@ export interface RedisCommands {
    * @param field
    * @param value
    */
-  hset(key: string, field: string, value: string): Promise<Integer>;
+  hset(key: string, field: string, value: string | number): Promise<Integer>;
 
   /**
    * Set the string value of a hash field
    * @param key
    * @param field_values mutiple fields and values
    */
-  hset(key: string, ...field_values: string[]): Promise<Integer>;
+  hset(key: string, ...field_values: (string | number)[]): Promise<Integer>;
 
   /**
    * Set the value of a hash field, only if the field does not exist
@@ -484,7 +484,7 @@ export interface RedisCommands {
    * @param field
    * @param value
    */
-  hsetnx(key: string, field: string, value: string): Promise<Integer>;
+  hsetnx(key: string, field: string, value: string | number): Promise<Integer>;
 
   /**
    * Get the length of the value of a hash field
@@ -520,7 +520,11 @@ export interface RedisCommands {
    * @param element
    * @param elements more elements
    */
-  pfadd(key: string, element: string, ...elements: string[]): Promise<Integer>;
+  pfadd(
+    key: string,
+    element: string | number,
+    ...elements: (string | number)[]
+  ): Promise<Integer>;
 
   /**
    * Return the approximated cardinality of the set(s) observed by the HyperLogLog at key(s)
@@ -531,14 +535,14 @@ export interface RedisCommands {
 
   /**
    * Merge N different HyperLogLogs into a single one
-   * @param dest_key
-   * @param source_key
-   * @param source_keys more keys
+   * @param destkey
+   * @param sourcekey
+   * @param sourcekeys more keys
    */
   pfmerge(
-    dest_key: string,
-    source_key: string,
-    ...source_keys: string[]
+    destkey: string,
+    sourcekey: string,
+    ...sourcekeys: string[]
   ): Promise<Status>;
 
   /**
@@ -573,7 +577,7 @@ export interface RedisCommands {
    * @param key
    * @param timestamp
    */
-  expireat(key: string, timestamp: string): Promise<Integer>;
+  expireat(key: string, timestamp: number): Promise<Integer>;
 
   /**
    * Find all keys matching the given pattern
@@ -771,17 +775,17 @@ export interface RedisCommands {
 
   /**
    * Remove and get the first element in a list, or block until one is available
-   * @param keys
    * @param timeout
+   * @param keys
    */
-  blpop(keys: string | string[], timeout: number): Promise<Bulk[]>;
+  blpop(timeout: number, ...keys: string[]): Promise<Bulk[]>;
 
   /**
    * Remove and get the last element in a list, or block until one is available
-   * @param keys
    * @param timeout
+   * @param keys
    */
-  brpop(keys: string | string[], timeout: number): Promise<Bulk[]>;
+  brpop(timeout: number, ...keys: string[]): Promise<Bulk[]>;
 
   /**
    * Pop an element from a list, push it to another list and return it; or block until one is available
@@ -793,7 +797,7 @@ export interface RedisCommands {
     source: string,
     destination: string,
     timeout: number,
-  ): Promise<Bulk | []>;
+  ): Promise<Bulk>;
 
   /**
    * Get an element from a list by its index
@@ -813,7 +817,7 @@ export interface RedisCommands {
     key: string,
     loc: "BEFORE" | "AFTER",
     pivot: string,
-    value: string,
+    value: string | number,
   ): Promise<Integer>;
 
   /**
@@ -836,7 +840,7 @@ export interface RedisCommands {
    */
   lpost(
     key: string,
-    element: string,
+    element: string | number,
     opts?: {
       rank?: number;
       count?: number;
@@ -850,7 +854,11 @@ export interface RedisCommands {
    * @param element
    * @param elements more elements
    */
-  lpush(key: string, element: string, ...elements: string[]): Promise<Integer>;
+  lpush(
+    key: string,
+    element: string | number,
+    ...elements: (string | number)[]
+  ): Promise<Integer>;
 
   /**
    * Prepend an element to a list, only if the list exists
@@ -858,7 +866,11 @@ export interface RedisCommands {
    * @param element
    * @param elements more elements
    */
-  lpushx(key: string, element: string, ...elements: string[]): Promise<Integer>;
+  lpushx(
+    key: string,
+    element: string | number,
+    ...elements: (string | number)[]
+  ): Promise<Integer>;
 
   /**
    * Get a range of elements from a list
@@ -874,7 +886,7 @@ export interface RedisCommands {
    * @param count
    * @param value
    */
-  lrem(key: string, count: number, value: string): Promise<Integer>;
+  lrem(key: string, count: number, value: string | number): Promise<Integer>;
 
   /**
    * Set the value of an element in a list by its index
@@ -882,7 +894,7 @@ export interface RedisCommands {
    * @param index
    * @param value
    */
-  lset(key: string, index: number, value: string): Promise<Status>;
+  lset(key: string, index: number, value: string | number): Promise<Status>;
 
   /**
    * Trim a list to the specified range
@@ -911,7 +923,11 @@ export interface RedisCommands {
    * @param element
    * @param elements more elements
    */
-  rpush(key: string, element: string, ...elements: string[]): Promise<Integer>;
+  rpush(
+    key: string,
+    element: string | number,
+    ...elements: (string | number)[]
+  ): Promise<Integer>;
 
   /**
    * Append an element to a list, only if the list exists
@@ -919,7 +935,11 @@ export interface RedisCommands {
    * @param element
    * @param elements more elements
    */
-  rpushx(key: string, element: string, ...elements: string[]): Promise<Integer>;
+  rpushx(
+    key: string,
+    element: string | number,
+    ...elements: (string | number)[]
+  ): Promise<Integer>;
 
   /**
    * Listen for messages published to channels matching the given patterns
@@ -953,7 +973,7 @@ export interface RedisCommands {
    * @param channel
    * @param message
    */
-  publish(channel: string, message: string): Promise<Integer>;
+  publish(channel: string, message: string | number): Promise<Integer>;
 
   /**
    * Listen for messages published to the given channels
@@ -973,7 +993,7 @@ export interface RedisCommands {
     script: string,
     numkeys: number,
     keys: string | string[],
-    args: string | string[],
+    args: (string | number) | (string | number)[],
   ): Promise<Raw>;
 
   /**
@@ -987,7 +1007,7 @@ export interface RedisCommands {
     sha1: string,
     numkeys: number,
     keys: string | string[],
-    args: string | string[],
+    args: (string | number) | (string | number)[],
   ): Promise<Raw>;
 
   /**
@@ -1050,14 +1070,14 @@ export interface RedisCommands {
    * @param username
    * @param rules
    */
-  acl_setuser(username: string, rules: string | string[]): Promise<Status>;
+  acl_setuser(username: string, ...rules: string[]): Promise<Status>;
 
   /**
    * Remove the specified ACL users and the associated rules
    * @param username
    * @param usernames more users
    */
-  acl_deluser(username: string, usernames: string[]): Promise<Integer>;
+  acl_deluser(username: string, ...usernames: string[]): Promise<Integer>;
 
   /**
    * List the ACL categories or the commands inside a category
@@ -1067,9 +1087,9 @@ export interface RedisCommands {
 
   /**
    * Generate a pseudorandom secure password to use for ACL users
-   * @param numbits
+   * @param bits
    */
-  acl_genpass(numbits?: number): Promise<Status>;
+  acl_genpass(bits?: number): Promise<Status>;
 
   /**
    * Return the name of the user associated to the current connection
@@ -1101,7 +1121,7 @@ export interface RedisCommands {
    * Get array of Redis command details
    */
   command(): Promise<
-    [BulkString, Integer, BulkString[], Integer, Integer, Integer]
+    [BulkString, Integer, BulkString[], Integer, Integer, Integer, BulkString[]]
   >;
 
   /**
@@ -1123,18 +1143,16 @@ export interface RedisCommands {
     command_name: string,
     ...command_names: string[]
   ): Promise<
-    [
-      | [
-        BulkString,
-        Integer,
-        BulkString[],
-        Integer,
-        Integer,
-        Integer,
-        [BulkString[]],
-      ]
-      | BulkNil,
+    | [
+      BulkString,
+      Integer,
+      BulkString[],
+      Integer,
+      Integer,
+      Integer,
+      BulkString[],
     ]
+    | BulkNil
   >;
 
   /**
@@ -1153,7 +1171,7 @@ export interface RedisCommands {
    * @param parameter
    * @param value
    */
-  config_set(parameter: string, value: string): Promise<Status>;
+  config_set(parameter: string, value: string | number): Promise<Status>;
 
   /**
    * Reset the stats returned by INFO
@@ -1241,7 +1259,7 @@ export interface RedisCommands {
    * @param path
    * @param args
    */
-  module_load(path: string, args: string | string[]): Promise<Status>;
+  module_load(path: string, ...args: string[]): Promise<Status>;
 
   /**
    * Unload a module
@@ -1300,7 +1318,10 @@ export interface RedisCommands {
    * @param subcommand
    * @param args
    */
-  slowlog(subcommand: string, ...args: string[]): Promise<ConditionalArray>;
+  slowlog(
+    subcommand: string,
+    ...args: (string | number)[]
+  ): Promise<ConditionalArray>;
 
   /**
    * Swap two Redis databases
@@ -1320,7 +1341,11 @@ export interface RedisCommands {
    * @param member
    * @param members more members
    */
-  sadd(key: string, member: string, ...members: string[]): Promise<Integer>;
+  sadd(
+    key: string,
+    member: string | number,
+    ...members: (string | number)[]
+  ): Promise<Integer>;
 
   /**
    * Get the number of members in a set
@@ -1371,7 +1396,7 @@ export interface RedisCommands {
    * @param key
    * @param member
    */
-  sismember(key: string, member: string): Promise<Integer>;
+  sismember(key: string, member: string | number): Promise<Integer>;
 
   /**
    * Get all members of a set
@@ -1385,7 +1410,11 @@ export interface RedisCommands {
    * @param destination
    * @param member
    */
-  smove(source: string, destination: string, member: string): Promise<Integer>;
+  smove(
+    source: string,
+    destination: string,
+    member: string | number,
+  ): Promise<Integer>;
 
   /**
    * Remove and return one or multiple random members from a set
@@ -1407,7 +1436,11 @@ export interface RedisCommands {
    * @param member
    * @param members more members
    */
-  srem(key: string, member: string, ...members: string[]): Promise<Integer>;
+  srem(
+    key: string,
+    member: string | number,
+    ...members: (string | number)[]
+  ): Promise<Integer>;
 
   /**
    * Add multiple sets
@@ -1445,23 +1478,23 @@ export interface RedisCommands {
 
   /**
    * Remove and return the member with the lowest score from one or more sorted sets, or block until one is available
-   * @param keys
    * @param timeout
+   * @param keys
    */
   bzpopmin(
-    keys: string | string[],
     timeout: number,
-  ): Promise<[BulkString, BulkString, BulkString] | []>;
+    ...keys: string[]
+  ): Promise<[] | [BulkString, BulkString, BulkString]>;
 
   /**
    * Remove and return the member with the highest score from one or more sorted sets, or block until one is available
-   * @param keys
    * @param timeout
+   * @param keys
    */
   bzpopmax(
-    keys: string | string[],
     timeout: number,
-  ): Promise<[BulkString, BulkString, BulkString] | []>;
+    ...keys: string[]
+  ): Promise<[] | [BulkString, BulkString, BulkString]>;
 
   /**
    * Add a member to a sorted set, or update its score if it already exists
@@ -1473,7 +1506,7 @@ export interface RedisCommands {
   zadd(
     key: string,
     score: number,
-    member: string,
+    member: string | number,
     opts?: {
       mode?: "NX" | "XX";
       changed?: boolean;
@@ -1489,7 +1522,7 @@ export interface RedisCommands {
    */
   zadd(
     key: string,
-    score_members: [number, string][],
+    score_members: [number, string | number][],
     opts?: {
       mode?: "NX" | "XX";
       changed?: boolean;
@@ -1509,7 +1542,11 @@ export interface RedisCommands {
    * @param min
    * @param max
    */
-  zcount(key: string, min: number, max: number): Promise<Integer>;
+  zcount(
+    key: string,
+    min: string | number,
+    max: string | number,
+  ): Promise<Integer>;
 
   /**
    * Increment the score of a member in a sorted set
@@ -1517,7 +1554,11 @@ export interface RedisCommands {
    * @param increment
    * @param member
    */
-  zincrby(key: string, increment: number, member: string): Promise<BulkString>;
+  zincrby(
+    key: string,
+    increment: number,
+    member: string | number,
+  ): Promise<BulkString>;
 
   /**
    * Intersect multiple sorted sets and store the resulting sorted set in a new key
@@ -1600,8 +1641,8 @@ export interface RedisCommands {
    */
   zrevrangebylex(
     key: string,
-    max: number | string,
-    min: number | string,
+    max: string,
+    min: string,
     opts?: {
       offset?: number;
       count?: number;
@@ -1617,8 +1658,8 @@ export interface RedisCommands {
    */
   zrangebyscore(
     key: string,
-    min: number | string,
-    max: number | string,
+    min: string | number,
+    max: string | number,
     opts?: {
       with_score?: boolean;
       offset?: number;
@@ -1631,7 +1672,7 @@ export interface RedisCommands {
    * @param key
    * @param member
    */
-  zrank(key: string, member: string): Promise<Integer | BulkNil>;
+  zrank(key: string, member: string | number): Promise<Integer | BulkNil>;
 
   /**
    * Remove one or more members from a sorted set
@@ -1639,7 +1680,11 @@ export interface RedisCommands {
    * @param member
    * @param members more members
    */
-  zrem(key: string, member: string, ...members: string[]): Promise<Integer>;
+  zrem(
+    key: string,
+    member: string | number,
+    ...members: (string | number)[]
+  ): Promise<Integer>;
 
   /**
    * Remove all members in a sorted set between the given lexicographical range
@@ -1663,7 +1708,11 @@ export interface RedisCommands {
    * @param min
    * @param max
    */
-  zremrangebyscore(key: string, min: number, max: number): Promise<Integer>;
+  zremrangebyscore(
+    key: string,
+    min: string | number,
+    max: string | number,
+  ): Promise<Integer>;
 
   /**
    * Return a range of members in a sorted set, by index, with scores ordered from high to low
@@ -1690,8 +1739,8 @@ export interface RedisCommands {
    */
   zrevrangebyscore(
     key: string,
-    max: number,
-    min: number,
+    max: number | number,
+    min: number | number,
     ops?: {
       with_score?: boolean;
       offset?: number;
@@ -1704,14 +1753,14 @@ export interface RedisCommands {
    * @param key
    * @param member
    */
-  zrevrank(key: string, member: string): Promise<Integer | BulkNil>;
+  zrevrank(key: string, member: string | number): Promise<Integer | BulkNil>;
 
   /**
    * Get the score associated with the given member in a sorted set
    * @param key
    * @param member
    */
-  zscore(key: string, member: string): Promise<Bulk>;
+  zscore(key: string, member: string | number): Promise<Bulk>;
 
   /**
    * Add multiple sorted sets and store the resulting sorted set in a new key
@@ -1749,7 +1798,7 @@ export interface RedisCommands {
    * @param key
    * @param value
    */
-  append(key: string, value: string): Promise<Integer>;
+  append(key: string, value: string | number): Promise<Integer>;
 
   /**
    * Count set bits in a string
@@ -1774,7 +1823,7 @@ export interface RedisCommands {
     key: string,
     opts?: {
       get?: { type: string; offset: number | string };
-      set?: { type: string; offset: number | string; value: number };
+      set?: { type: string; offset: number | string; value: string | number };
       incrby?: { type: string; offset: number | string; increment: number };
       overflow?: "WRAP" | "SAT" | "FAIL";
     },
@@ -1847,7 +1896,7 @@ export interface RedisCommands {
    * @param key
    * @param value
    */
-  getset(key: string, value: string): Promise<Bulk>;
+  getset(key: string, value: string | number): Promise<Bulk>;
 
   /**
    * Increment the integer value of a key by one
@@ -1867,7 +1916,7 @@ export interface RedisCommands {
    * @param key
    * @param increment
    */
-  incrbyfloat(key: string, increment: number): Promise<Bulk>;
+  incrbyfloat(key: string, increment: number): Promise<BulkString>;
 
   /**
    * Get the values of all the given keys
@@ -1881,26 +1930,26 @@ export interface RedisCommands {
    * @param key
    * @param value
    */
-  mset(key: string, value: string): Promise<Status>;
+  mset(key: string, value: string | number): Promise<Status>;
 
   /**
    * Set multiple keys to multiple values
    * @param key_values
    */
-  mset(...key_values: string[]): Promise<Status>;
+  mset(...key_values: (string | number)[]): Promise<Status>;
 
   /**
    * Set a key to a value, only if the key does not exist
    * @param key
    * @param value
    */
-  msetnx(key: string, value: string): Promise<Integer>;
+  msetnx(key: string, value: string | number): Promise<Integer>;
 
   /**
    * Set multiple keys to multiple values, only if none of the keys exist
    * @param key_values
    */
-  msetnx(...key_values: string[]): Promise<Integer>;
+  msetnx(...key_values: (string | number)[]): Promise<Integer>;
 
   /**
    * Set the value and expiration in milliseconds of a key
@@ -1908,7 +1957,11 @@ export interface RedisCommands {
    * @param milliseconds
    * @param value
    */
-  psetex(key: string, milliseconds: number, value: string): Promise<Status>;
+  psetex(
+    key: string,
+    milliseconds: number,
+    value: string | number,
+  ): Promise<Status>;
 
   /**
    * Set the string value of a key
@@ -1918,7 +1971,7 @@ export interface RedisCommands {
    */
   set(
     key: string,
-    value: string,
+    value: string | number,
     opts?: {
       px?: number;
       mode?: "NX" | "XX";
@@ -1932,7 +1985,7 @@ export interface RedisCommands {
    * @param offset
    * @param value
    */
-  setbit(key: string, offset: number, value: string): Promise<Integer>;
+  setbit(key: string, offset: number, value: string | number): Promise<Integer>;
 
   /**
    * Set the value and expiration of a key
@@ -1940,14 +1993,14 @@ export interface RedisCommands {
    * @param seconds
    * @param value
    */
-  setex(key: string, seconds: number, value: string): Promise<Status>;
+  setex(key: string, seconds: number, value: string | number): Promise<Status>;
 
   /**
    * Set the value of a key, only if the key does not exist
    * @param key
    * @param value
    */
-  setnx(key: string, value: string): Promise<Integer>;
+  setnx(key: string, value: string | number): Promise<Integer>;
 
   /**
    * Overwrite part of a string at key starting at the specified offset
@@ -1955,7 +2008,11 @@ export interface RedisCommands {
    * @param offset
    * @param value
    */
-  setrange(key: string, offset: number, value: string): Promise<Integer>;
+  setrange(
+    key: string,
+    offset: number,
+    value: string | number,
+  ): Promise<Integer>;
 
   /**
    * Run LCS algorithm against strings
