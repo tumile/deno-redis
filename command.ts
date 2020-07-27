@@ -65,9 +65,9 @@ export interface RedisCommands {
 
   /**
    * Forces a replica to perform a manual failover of its master
-   * @param opt FORCE or TAKEOVER
+   * @param mode FORCE or TAKEOVER
    */
-  cluster_failover(opt?: "FORCE" | "TAKEOVER"): Promise<Status>;
+  cluster_failover(mode?: "FORCE" | "TAKEOVER"): Promise<Status>;
 
   /**
    * Delete a node's own slots information
@@ -129,9 +129,9 @@ export interface RedisCommands {
 
   /**
    * Reset a Redis Cluster node
-   * @param opt HARD or SOFT (default)
+   * @param mode HARD or SOFT (default)
    */
-  cluster_reset(opt?: "HARD" | "SOFT"): Promise<Status>;
+  cluster_reset(mode?: "HARD" | "SOFT"): Promise<Status>;
 
   /**
    * Forces the node to save cluster state on disk
@@ -235,11 +235,11 @@ export interface RedisCommands {
   /**
    * Unblock a client blocked in a blocking command from a different connection
    * @param client_id
-   * @param opt TIMEOUT (default) or ERROR
+   * @param mode TIMEOUT (default) or ERROR
    */
   client_unblock(
     client_id: number,
-    opt?: "TIMEOUT" | "ERROR",
+    mode?: "TIMEOUT" | "ERROR",
   ): Promise<Integer>;
 
   /**
@@ -596,7 +596,7 @@ export interface RedisCommands {
    */
   migrate(
     host: string,
-    port: number,
+    port: string | number,
     key: string,
     destination_db: string,
     timeout: number,
@@ -604,7 +604,7 @@ export interface RedisCommands {
       copy?: boolean;
       replace?: boolean;
       password?: string;
-      keys?: string | string[];
+      keys?: string[];
     },
   ): Promise<Status>;
 
@@ -717,8 +717,10 @@ export interface RedisCommands {
     key: string,
     opts?: {
       by?: string;
-      offset?: number;
-      count?: number;
+      limit?: {
+        offset: number;
+        count: number;
+      };
       patterns?: string[];
       order?: "ASC" | "DESC";
       alpha?: boolean;
@@ -961,7 +963,7 @@ export interface RedisCommands {
    * Return the number of subscribers, not counting clients subscribed to patterns, for the specified channels
    * @param channels
    */
-  pubsub_numsubs(...channels: string[]): Promise<[BulkString, Integer][]>;
+  pubsub_numsub(...channels: string[]): Promise<[BulkString, Integer][]>;
 
   /**
    * Return the number of subscriptions to patterns that are performed using the PSUBSCRIBE command
@@ -989,12 +991,7 @@ export interface RedisCommands {
    * @param keys
    * @param args
    */
-  eval(
-    script: string,
-    numkeys: number,
-    keys: string | string[],
-    args: (string | number) | (string | number)[],
-  ): Promise<Raw>;
+  eval(script: string, keys: string[], args: (string | number)[]): Promise<Raw>;
 
   /**
    * Execute a Lua script server side
@@ -1005,9 +1002,8 @@ export interface RedisCommands {
    */
   evalsha(
     sha1: string,
-    numkeys: number,
-    keys: string | string[],
-    args: (string | number) | (string | number)[],
+    keys: string[],
+    args: (string | number)[],
   ): Promise<Raw>;
 
   /**
@@ -1089,12 +1085,12 @@ export interface RedisCommands {
    * Generate a pseudorandom secure password to use for ACL users
    * @param bits
    */
-  acl_genpass(bits?: number): Promise<Status>;
+  acl_genpass(bits?: number): Promise<BulkString>;
 
   /**
    * Return the name of the user associated to the current connection
    */
-  acl_whoami(): Promise<Status>;
+  acl_whoami(): Promise<BulkString>;
 
   /**
    * List latest events denied because of ACLs in place or reset log
@@ -1121,7 +1117,15 @@ export interface RedisCommands {
    * Get array of Redis command details
    */
   command(): Promise<
-    [BulkString, Integer, BulkString[], Integer, Integer, Integer, BulkString[]]
+    [
+      BulkString,
+      Integer,
+      BulkString[],
+      Integer,
+      Integer,
+      Integer,
+      BulkString[],
+    ][]
   >;
 
   /**
@@ -1143,16 +1147,18 @@ export interface RedisCommands {
     command_name: string,
     ...command_names: string[]
   ): Promise<
-    | [
-      BulkString,
-      Integer,
-      BulkString[],
-      Integer,
-      Integer,
-      Integer,
-      BulkString[],
-    ]
-    | BulkNil
+    (
+      | [
+        BulkString,
+        Integer,
+        BulkString[],
+        Integer,
+        Integer,
+        Integer,
+        BulkString[],
+      ]
+      | BulkNil
+    )[]
   >;
 
   /**
@@ -1220,7 +1226,7 @@ export interface RedisCommands {
   /**
    * Outputs memory problems report
    */
-  memory_doctor(): Promise<Status>;
+  memory_doctor(): Promise<BulkString>;
 
   /**
    * Show helpful text about the different subcommands
@@ -1230,7 +1236,7 @@ export interface RedisCommands {
   /**
    * Show allocator internal stats
    */
-  memory_malloc_stats(): Promise<Status>;
+  memory_malloc_stats(): Promise<BulkString>;
 
   /**
    * Ask the allocator to release memory
@@ -1247,7 +1253,7 @@ export interface RedisCommands {
    * @param key
    * @param samples
    */
-  memory_usage(key: string, samples?: number): Promise<Integer>;
+  memory_usage(key: string, samples?: number): Promise<Integer | BulkNil>;
 
   /**
    * List all modules loaded by the server
@@ -1283,9 +1289,9 @@ export interface RedisCommands {
 
   /**
    * Synchronously save the dataset to disk and then shut down the server
-   * @param opt
+   * @param mode
    */
-  shutdown(opt?: "NOSAVE" | "SAVE"): Promise<Status>;
+  shutdown(mode?: "NOSAVE" | "SAVE"): Promise<Status>;
 
   /**
    * Make the server a replica of another instance
@@ -1563,16 +1569,14 @@ export interface RedisCommands {
   /**
    * Intersect multiple sorted sets and store the resulting sorted set in a new key
    * @param destination
-   * @param numkeys
    * @param keys
    * @param opts more options
    */
   zinterstore(
     destination: string,
-    numkeys: number,
-    keys: string | string[],
+    keys: string[],
     opts?: {
-      weights?: number | number[];
+      weights?: number[];
       aggregate?: "SUM" | "MIN" | "MAX";
     },
   ): Promise<Integer>;
@@ -1627,8 +1631,10 @@ export interface RedisCommands {
     min: string,
     max: string,
     opts?: {
-      offset?: number;
-      count?: number;
+      limit?: {
+        offset: number;
+        count: number;
+      };
     },
   ): Promise<BulkString[]>;
 
@@ -1644,8 +1650,10 @@ export interface RedisCommands {
     max: string,
     min: string,
     opts?: {
-      offset?: number;
-      count?: number;
+      limit?: {
+        offset: number;
+        count: number;
+      };
     },
   ): Promise<BulkString[]>;
 
@@ -1662,8 +1670,10 @@ export interface RedisCommands {
     max: string | number,
     opts?: {
       with_score?: boolean;
-      offset?: number;
-      count?: number;
+      limit?: {
+        offset: number;
+        count: number;
+      };
     },
   ): Promise<BulkString[]>;
 
@@ -1743,8 +1753,10 @@ export interface RedisCommands {
     min: number | number,
     ops?: {
       with_score?: boolean;
-      offset?: number;
-      count?: number;
+      limit?: {
+        offset: number;
+        count: number;
+      };
     },
   ): Promise<BulkString[]>;
 
@@ -1770,10 +1782,9 @@ export interface RedisCommands {
    */
   zunionstore(
     destination: string,
-    numkeys: number,
-    keys: string | string[],
+    keys: string[],
     opts?: {
-      weights?: number | number[];
+      weights?: number[];
       aggregate?: "SUM" | "MIN" | "MAX";
     },
   ): Promise<Integer>;
@@ -1973,6 +1984,7 @@ export interface RedisCommands {
     key: string,
     value: string | number,
     opts?: {
+      ex?: number;
       px?: number;
       mode?: "NX" | "XX";
       keepttl?: boolean;
